@@ -13,9 +13,18 @@
   --bg: #050a0f; --card: rgba(255,255,255,0.04); --border: rgba(255,255,255,0.08);
   --text: #f0f0ff; --text2: rgba(240,240,255,0.6); --text3: rgba(240,240,255,0.35);
   --buy: #00e676; --sell: #ff5252;
+  --surface: rgba(255,255,255,0.035); --surface2: rgba(255,255,255,0.06);
+  --navbg: rgba(5,10,15,0.92);
+}
+body.light-theme {
+  --bg: #f4f6f9; --card: rgba(0,20,10,0.035); --border: rgba(10,20,15,0.09);
+  --text: #12161c; --text2: rgba(18,22,28,0.62); --text3: rgba(18,22,28,0.4);
+  --buy: #0a9d52; --sell: #e0342f;
+  --surface: rgba(0,20,10,0.035); --surface2: rgba(0,20,10,0.055);
+  --navbg: rgba(255,255,255,0.85);
 }
 * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-body { font-family:'Cairo',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; overflow-x:hidden; }
+body { font-family:'Cairo',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; overflow-x:hidden; transition:background 0.3s, color 0.3s; }
 
 /* Flag bg */
 .flag-bg { position:fixed; inset:0; z-index:-2; opacity:0.02;
@@ -28,9 +37,9 @@ body { font-family:'Cairo',sans-serif; background:var(--bg); color:var(--text); 
   border-left:25px solid transparent; border-right:25px solid transparent; border-top:18px solid var(--r); }
 
 /* Nav */
-.nav { position:fixed; top:0; left:0; right:0; height:56px; background:rgba(5,10,15,0.95);
+.nav { position:fixed; top:0; left:0; right:0; height:56px; background:var(--navbg);
   backdrop-filter:blur(20px); border-bottom:1px solid var(--border); display:flex;
-  align-items:center; justify-content:space-between; padding:0 12px; z-index:100; }
+  align-items:center; justify-content:space-between; padding:0 12px; z-index:100; transition:background 0.3s; }
 .brand { display:flex; align-items:center; gap:8px; font-weight:900; font-size:1.1rem;
   background:linear-gradient(135deg, var(--g), var(--gold)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
 .brand .f { width:28px; height:20px; border-radius:3px; overflow:hidden; display:flex; flex-direction:column; }
@@ -48,6 +57,11 @@ body { font-family:'Cairo',sans-serif; background:var(--bg); color:var(--text); 
 
 .countdown { font-size:0.7rem; color:var(--gold); background:rgba(212,175,55,0.1);
   padding:2px 8px; border-radius:50px; border:1px solid rgba(212,175,55,0.2); }
+
+.theme-toggle { width:30px; height:30px; border-radius:50%; border:1px solid var(--border);
+  background:var(--surface2); color:var(--gold); font-size:0.8rem; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; transition:all 0.3s; flex-shrink:0; }
+.theme-toggle:active { transform:scale(0.9); }
 
 /* Main */
 .main { padding-top:56px; padding-bottom:80px; }
@@ -71,7 +85,7 @@ body { font-family:'Cairo',sans-serif; background:var(--bg); color:var(--text); 
   background:var(--card); color:var(--text2); font-family:'Cairo'; font-size:0.9rem;
   font-weight:700; cursor:pointer; text-align:center; transition:all 0.3s; display:flex;
   align-items:center; justify-content:center; gap:8px; }
-.trade-tab i { font-size:1.1rem; }
+.trade-tab i { font-size:0.95rem; }
 .trade-tab.buy-tab.active { background:rgba(0,230,118,0.15); border-color:var(--buy); color:var(--buy); box-shadow:0 0 20px rgba(0,230,118,0.1); }
 .trade-tab.sell-tab.active { background:rgba(255,82,82,0.15); border-color:var(--sell); color:var(--sell); box-shadow:0 0 20px rgba(255,82,82,0.1); }
 
@@ -90,12 +104,13 @@ body { font-family:'Cairo',sans-serif; background:var(--bg); color:var(--text); 
 /* Converter Card */
 .conv-card { background:linear-gradient(135deg, rgba(0,122,61,0.1), rgba(206,17,38,0.05));
   border:1px solid rgba(0,122,61,0.2); border-radius:24px; padding:20px 16px;
-  position:relative; overflow:hidden; margin-bottom:12px; }
+  position:relative; overflow:hidden; margin-bottom:12px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.15); }
 .conv-card::before { content:''; position:absolute; top:0; left:0; width:100%; height:3px;
   background:linear-gradient(90deg, var(--g), var(--gold), var(--r)); }
 
 /* Input boxes */
-.input-box { background:rgba(255,255,255,0.03); border:1.5px solid var(--border);
+.input-box { background:var(--surface); border:1.5px solid var(--border);
   border-radius:18px; padding:14px 16px; margin-bottom:10px; transition:all 0.3s; }
 .input-box:focus-within { border-color:var(--g); box-shadow:0 0 0 3px rgba(0,122,61,0.1); }
 .input-label { font-size:0.7rem; color:var(--text3); margin-bottom:6px; font-weight:600; }
@@ -105,11 +120,11 @@ body { font-family:'Cairo',sans-serif; background:var(--bg); color:var(--text); 
 .amount-inp::placeholder { color:var(--text3); }
 
 /* Currency selector */
-.curr-sel { display:flex; align-items:center; gap:6px; background:rgba(255,255,255,0.05);
-  border:1px solid var(--border); border-radius:12px; padding:8px 12px; cursor:pointer;
-  flex-shrink:0; min-width:110px; }
+.curr-sel { display:flex; align-items:center; gap:6px; background:var(--surface2);
+  border:1px solid var(--border); border-radius:12px; padding:7px 11px; cursor:pointer;
+  flex-shrink:0; min-width:100px; }
 .curr-sel:active { transform:scale(0.97); }
-.curr-flag { font-size:1.3rem; line-height:1; }
+.curr-flag { font-size:1.05rem; line-height:1; }
 .curr-code { font-weight:800; font-size:0.95rem; color:var(--text); }
 .curr-name { font-size:0.65rem; color:var(--text3); }
 .curr-arrow { color:var(--text3); font-size:0.7rem; margin-right:auto; }
@@ -117,12 +132,18 @@ body { font-family:'Cairo',sans-serif; background:var(--bg); color:var(--text); 
 /* Syria flag SVG */
 .syria-flag { width:24px; height:16px; border-radius:2px; overflow:hidden; display:inline-block; vertical-align:middle; }
 
-/* Swap */
-.swap-wrap { text-align:center; margin:4px 0; }
-.swap-btn { width:48px; height:48px; border-radius:50%; background:linear-gradient(135deg, var(--g), var(--gold));
-  border:none; color:#fff; font-size:1.1rem; cursor:pointer; box-shadow:0 4px 15px rgba(0,122,61,0.4);
-  transition:all 0.3s; display:inline-flex; align-items:center; justify-content:center; }
-.swap-btn:active { transform:rotate(180deg) scale(0.9); }
+/* Rate chip (replaces the old plain swap button - shows the live result inline) */
+.swap-wrap { margin:6px 0; }
+.rate-chip { display:flex; align-items:center; gap:10px; background:var(--surface2);
+  border:1px solid var(--border); border-radius:50px; padding:6px 6px 6px 18px;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,0.02); }
+.rate-chip-text { flex:1; text-align:center; font-size:0.78rem; font-weight:800;
+  color:var(--gold); letter-spacing:0.2px; }
+.swap-mini-btn { width:32px; height:32px; border-radius:50%; flex-shrink:0;
+  background:linear-gradient(135deg, var(--g), var(--gold)); border:none; color:#fff;
+  font-size:0.8rem; cursor:pointer; display:flex; align-items:center; justify-content:center;
+  box-shadow:0 3px 12px rgba(0,122,61,0.35); transition:transform 0.3s; }
+.swap-mini-btn:active { transform:rotate(180deg) scale(0.9); }
 
 /* Result */
 .result-box { text-align:center; padding:18px; background:rgba(0,122,61,0.06);
@@ -164,7 +185,7 @@ body { font-family:'Cairo',sans-serif; background:var(--bg); color:var(--text); 
 .pop-card:active::before { transform:scaleX(1); }
 .pop-card:active { border-color:rgba(0,122,61,0.3); }
 
-.pop-flag-wrap { font-size:2.2rem; flex-shrink:0; width:50px; text-align:center; }
+.pop-flag-wrap { font-size:1.8rem; flex-shrink:0; width:42px; text-align:center; }
 .pop-info { flex:1; min-width:0; }
 .pop-name { font-size:1rem; font-weight:800; margin-bottom:2px; }
 .pop-code { font-size:0.75rem; color:var(--text3); margin-bottom:6px; }
@@ -172,8 +193,8 @@ body { font-family:'Cairo',sans-serif; background:var(--bg); color:var(--text); 
 /* Buy/Sell prices with arrows */
 .pop-prices { display:flex; gap:12px; }
 .pop-price-item { display:flex; align-items:center; gap:6px; }
-.pop-price-item .arrow { width:28px; height:28px; border-radius:50%; display:flex;
-  align-items:center; justify-content:center; font-size:0.8rem; }
+.pop-price-item .arrow { width:22px; height:22px; border-radius:50%; display:flex;
+  align-items:center; justify-content:center; font-size:0.68rem; }
 .pop-price-item.buy .arrow { background:rgba(0,230,118,0.15); color:var(--buy); }
 .pop-price-item.sell .arrow { background:rgba(255,82,82,0.15); color:var(--sell); }
 .pop-price-val { font-weight:800; font-size:0.9rem; }
@@ -191,7 +212,7 @@ body { font-family:'Cairo',sans-serif; background:var(--bg); color:var(--text); 
   padding:12px; background:var(--card); border:1px solid var(--border);
   border-radius:14px; margin-bottom:6px; }
 .all-item-left { display:flex; align-items:center; gap:10px; }
-.all-flag { font-size:1.4rem; }
+.all-flag { font-size:1.15rem; }
 .all-name { font-weight:700; font-size:0.85rem; }
 .all-rate { color:var(--gold); font-weight:800; font-size:0.9rem; }
 
@@ -203,7 +224,7 @@ body { font-family:'Cairo',sans-serif; background:var(--bg); color:var(--text); 
 
 /* Bottom nav */
 .bottom-nav { position:fixed; bottom:0; left:0; right:0; height:64px;
-  background:rgba(5,10,15,0.95); backdrop-filter:blur(20px);
+  background:var(--navbg); backdrop-filter:blur(20px);
   border-top:1px solid var(--border); display:flex; align-items:center;
   justify-content:space-around; z-index:100; }
 .b-tab { display:flex; flex-direction:column; align-items:center; gap:3px;
@@ -222,8 +243,8 @@ body { font-family:'Cairo',sans-serif; background:var(--bg); color:var(--text); 
 .modal.show .modal-content { transform:translateY(0); }
 .modal-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
 .modal-title { font-size:1.1rem; font-weight:800; }
-.modal-close { width:36px; height:36px; border-radius:50%; border:none; background:var(--card);
-  color:var(--text2); cursor:pointer; font-size:1rem; }
+.modal-close { width:32px; height:32px; border-radius:50%; border:none; background:var(--card);
+  color:var(--text2); cursor:pointer; font-size:0.9rem; }
 .modal-search { width:100%; padding:10px 14px; background:var(--card); border:1px solid var(--border);
   border-radius:12px; color:var(--text); font-family:'Cairo'; font-size:0.9rem;
   outline:none; margin-bottom:12px; }
@@ -231,7 +252,7 @@ body { font-family:'Cairo',sans-serif; background:var(--bg); color:var(--text); 
 .curr-item { display:flex; align-items:center; gap:12px; padding:12px;
   border-radius:12px; cursor:pointer; transition:all 0.2s; }
 .curr-item:active { background:rgba(0,122,61,0.1); }
-.curr-item-flag { font-size:1.5rem; }
+.curr-item-flag { font-size:1.25rem; }
 .curr-item-info { flex:1; }
 .curr-item-code { font-weight:800; font-size:0.95rem; }
 .curr-item-name { font-size:0.75rem; color:var(--text3); }
@@ -280,6 +301,9 @@ body { font-family:'Cairo',sans-serif; background:var(--bg); color:var(--text); 
     Ahmad El
   </div>
   <div style="display:flex;align-items:center;gap:8px;">
+    <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="تبديل الوضع النهاري/الليلي">
+      <i class="fas fa-sun" id="themeIcon"></i>
+    </button>
     <div class="live"><div class="live-dot"></div><span>مباشر</span></div>
     <div class="countdown" id="countdown">05:00</div>
   </div>
@@ -339,9 +363,12 @@ body { font-family:'Cairo',sans-serif; background:var(--bg); color:var(--text); 
         </div>
       </div>
 
-      <!-- Swap -->
+      <!-- Rate chip: shows the live result instead of a plain swap button -->
       <div class="swap-wrap">
-        <button class="swap-btn" onclick="swap()" id="swapBtn"><i class="fas fa-exchange-alt"></i></button>
+        <div class="rate-chip">
+          <span class="rate-chip-text" id="rateChipText">1 USD = — SYP</span>
+          <button class="swap-mini-btn" onclick="swap()" id="swapBtn" title="تبديل الاتجاه"><i class="fas fa-exchange-alt"></i></button>
+        </div>
       </div>
 
       <!-- To -->
@@ -388,8 +415,7 @@ body { font-family:'Cairo',sans-serif; background:var(--bg); color:var(--text); 
       </div>
 
       <div class="result-btns" style="margin-top:12px;">
-        <button class="res-btn" onclick="copyResult()"><i class="fas fa-copy"></i> نسخ</button>
-        <button class="res-btn" onclick="shareResult()"><i class="fas fa-share-alt"></i> مشاركة</button>
+        <button class="res-btn" onclick="copyResult()" style="padding:9px 22px;"><i class="fas fa-copy"></i> نسخ النتيجة</button>
       </div>
     </div>
 
@@ -417,6 +443,7 @@ body { font-family:'Cairo',sans-serif; background:var(--bg); color:var(--text); 
           <div>• حالة اتصال الليرة السورية: <span id="sypStatus">—</span></div>
           <div>• آخر مزامنة لليرة السورية: <span id="sypSyncTime">—</span></div>
           <div>• آخر تحديث: <span id="infoLastUpdate">—</span></div>
+          <div>• الأسعار معروضة بالليرة السورية الجديدة (بعد حذف صفرين، 2026)</div>
         </div>
       </div>
       <div style="text-align:center; padding:14px; color:var(--text3); font-size:0.8rem;">
@@ -458,7 +485,7 @@ body { font-family:'Cairo',sans-serif; background:var(--bg); color:var(--text); 
 // ═══════════════════════════════════════════════
 
 const BASE_RATES = {
-  USD: 1, SYP: 12950, TRY: 46.79, EUR: 0.923, SAR: 3.75, AED: 3.672,
+  USD: 1, SYP: 129.5, TRY: 46.79, EUR: 0.923, SAR: 3.75, AED: 3.672,
   EGP: 50.85, JOD: 0.709, LBP: 89500, IQD: 1310, KWD: 0.307, QAR: 3.64,
   BHD: 0.376, OMR: 0.385, GBP: 0.785, JPY: 161.45, CNY: 7.245, INR: 85.5,
   RUB: 88.75, CAD: 1.365, AUD: 1.525, CHF: 0.892, SEK: 10.65, NOK: 10.85,
@@ -470,12 +497,14 @@ const BASE_RATES = {
 // تجربة: قراءة مباشرة (غير رسمية) من sp-today.com عبر خدمة وسيطة - قد تتوقف بدون إنذار
 // SYP_MANUAL هو دائماً "آخر رقم حقيقي معروف" - يُحدَّث تلقائياً عند نجاح القراءة،
 // ويبقى محفوظاً محلياً كنسخة احتياطية إذا تعطلت القراءة المباشرة مستقبلاً
-let SYP_MANUAL = { buy: 12900, sell: 13000 };
+// بعد حذف صفرين من الليرة السورية مطلع 2026: 100 ليرة قديمة = ليرة جديدة واحدة
+let SYP_MANUAL = { buy: 129, sell: 130 };
 try {
   const cachedSyp = localStorage.getItem('sypManualCache');
   if (cachedSyp) {
     const parsed = JSON.parse(cachedSyp);
-    if (parsed && parsed.buy > 0 && parsed.sell > 0) SYP_MANUAL = parsed;
+    // نتجاهل أي نسخة محفوظة محلياً بمقياس الليرة القديمة (قبل حذف الصفرين) حتى لا تظهر أرقام قديمة خاطئة
+    if (parsed && parsed.buy > 0 && parsed.sell > 0 && parsed.buy < 1000) SYP_MANUAL = parsed;
   }
 } catch (e) {}
 let sypLiveOK = false;
@@ -485,7 +514,7 @@ const SPREAD = 0.02;
 
 const CURRENCIES = {
   USD: { name: 'دولار أمريكي', flag: '🇺🇸', symbol: '$' },
-  SYP: { name: 'ليرة سورية', flag: 'syria', symbol: 'ل.س' },
+  SYP: { name: 'ليرة سورية جديدة', flag: 'syria', symbol: 'ل.س' },
   TRY: { name: 'ليرة تركية', flag: '🇹🇷', symbol: '₺' },
   EUR: { name: 'يورو', flag: '🇪🇺', symbol: '€' },
   SAR: { name: 'ريال سعودي', flag: '🇸🇦', symbol: '﷼' },
@@ -529,6 +558,19 @@ const SYRIA_FLAG = `<svg class="syria-flag" viewBox="0 0 30 20" xmlns="http://ww
   <text x="15" y="11.8" font-size="6" fill="#ce1126" text-anchor="middle">★</text>
   <text x="22.5" y="11.8" font-size="6" fill="#ce1126" text-anchor="middle">★</text>
 </svg>`;
+
+// ===== Day / Night theme =====
+let isLightTheme = localStorage.getItem('themeMode') === 'light';
+function applyTheme() {
+  document.body.classList.toggle('light-theme', isLightTheme);
+  const icon = document.getElementById('themeIcon');
+  if (icon) icon.className = isLightTheme ? 'fas fa-moon' : 'fas fa-sun';
+}
+function toggleTheme() {
+  isLightTheme = !isLightTheme;
+  localStorage.setItem('themeMode', isLightTheme ? 'light' : 'dark');
+  applyTheme();
+}
 
 let fromCurr = 'USD';
 let toCurr = 'SYP';
@@ -624,10 +666,12 @@ async function trySypSource(source, targetUrl) {
   const text = raw.replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ');
   const match = text.match(/Buy\s*([\d,]+)\s*SYP\s*Sell\s*([\d,]+)\s*SYP/i);
   if (!match) throw new Error('parse_failed');
-  const buy = parseInt(match[1].replace(/,/g, ''), 10);
-  const sell = parseInt(match[2].replace(/,/g, ''), 10);
-  if (!(buy > 1000 && sell > 1000 && sell >= buy)) throw new Error('invalid_values');
-  return { buy, sell };
+  // المصدر الخارجي لا يزال يعرض القيم بمقياس الليرة القديمة (قبل حذف صفرين مطلع 2026)،
+  // لذلك نتحقق من صحتها بمقياسها الأصلي ثم نقسم ÷100 لعرضها بالليرة السورية الجديدة
+  const buyOld = parseInt(match[1].replace(/,/g, ''), 10);
+  const sellOld = parseInt(match[2].replace(/,/g, ''), 10);
+  if (!(buyOld > 1000 && sellOld > 1000 && sellOld >= buyOld)) throw new Error('invalid_values');
+  return { buy: buyOld / 100, sell: sellOld / 100 };
 }
 
 async function fetchSypLive() {
@@ -677,6 +721,7 @@ function startSypWatcher() {
 }
 
 async function init() {
+  applyTheme();
   renderPopular();
   updateUI();
   setTradeMode(tradeMode, false);
@@ -716,10 +761,12 @@ function setTradeMode(mode, save) {
 
 function updateSpreadInfo() {
   const rates = getBuySellRates(fromCurr, toCurr);
-  if (!rates) return;
+  const chip = document.getElementById('rateChipText');
+  if (!rates) { if (chip) chip.textContent = '—'; return; }
   const toSym = CURRENCIES[toCurr].symbol;
   document.getElementById('buyPrice').textContent = formatNum(rates.buy) + ' ' + toSym;
   document.getElementById('sellPrice').textContent = formatNum(rates.sell) + ' ' + toSym;
+  if (chip) chip.textContent = '1 ' + fromCurr + ' = ' + formatNum(rates.mid) + ' ' + toCurr;
 }
 
 function convert() {
@@ -792,7 +839,7 @@ function swap() {
 // ===== POPULAR CARDS WITH BUY/SELL ARROWS =====
 function renderPopular() {
   const popular = [
-    { code: 'SYP', name: 'ليرة سورية' },
+    { code: 'SYP', name: 'ليرة سورية جديدة' },
     { code: 'USD', name: 'دولار أمريكي' },
     { code: 'TRY', name: 'ليرة تركية' },
   ];
@@ -1045,22 +1092,6 @@ function copyResult() {
     '\n❤️ مبيع: ' + formatNum(amount * rates.sell) + ' ' + CURRENCIES[toCurr].symbol +
     '\n\nAhmad El - محول العملات';
   navigator.clipboard.writeText(fullText).then(() => showToast('📋 تم النسخ'));
-}
-
-function shareResult() {
-  const text = document.getElementById('resultInfo').textContent;
-  if (text.includes('أدخل')) { showToast('❌ لا يوجد نتيجة'); return; }
-  const rates = getBuySellRates(fromCurr, toCurr);
-  const amount = parseFloat(document.getElementById('amount').value) || 0;
-  const fullText = text +
-    '\n💚 سعر الشراء: ' + formatNum(amount * rates.buy) + ' ' + CURRENCIES[toCurr].symbol +
-    '\n❤️ سعر المبيع: ' + formatNum(amount * rates.sell) + ' ' + CURRENCIES[toCurr].symbol +
-    '\n\nAhmad El - محول العملات';
-  if (navigator.share) {
-    navigator.share({ title: 'Ahmad El', text: fullText });
-  } else {
-    navigator.clipboard.writeText(fullText).then(() => showToast('📋 تم النسخ'));
-  }
 }
 
 // Utils
