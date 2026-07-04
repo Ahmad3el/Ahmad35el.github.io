@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#007a3d">
+<title>Ahmad El - محول العملات</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+:root {
+  --g: #007a3d; --w: #fff; --b: #000; --r: #ce1126; --gold: #d4af37;
+  --bg: #050a0f; --card: rgba(255,255,255,0.04); --border: rgba(255,255,255,0.08);
+  --text: #f0f0ff; --text2: rgba(240,240,255,0.6); --text3: rgba(240,240,255,0.35);
+  --buy: #00e676; --sell: #ff5252;
+}
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+body { font-family:'Cairo',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; overflow-x:hidden; }
+
+/* Flag bg */
+.flag-bg { position:fixed; inset:0; z-index:-2; opacity:0.02;
+  background:linear-gradient(180deg, var(--g) 33%, var(--w) 33% 66%, var(--b) 66%); }
+.stars { position:fixed; top:33%; left:0; width:100%; height:33%; z-index:-1; 
+  display:flex; justify-content:center; align-items:center; gap:60px; opacity:0.05; pointer-events:none; }
+.star { width:0; height:0; border-left:25px solid transparent; border-right:25px solid transparent; 
+  border-bottom:18px solid var(--r); position:relative; }
+.star::before { content:''; position:absolute; left:-25px; top:18px; width:0; height:0;
+  border-left:25px solid transparent; border-right:25px solid transparent; border-top:18px solid var(--r); }
+
+/* Nav */
+.nav { position:fixed; top:0; left:0; right:0; height:56px; background:rgba(5,10,15,0.95);
+  backdrop-filter:blur(20px); border-bottom:1px solid var(--border); display:flex;
+  align-items:center; justify-content:space-between; padding:0 12px; z-index:100; }
+.brand { display:flex; align-items:center; gap:8px; font-weight:900; font-size:1.1rem;
+  background:linear-gradient(135deg, var(--g), var(--gold)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+.brand .f { width:28px; height:20px; border-radius:3px; overflow:hidden; display:flex; flex-direction:column; }
+.brand .f div { height:33.33%; width:100%; }
+.brand .f .g { background:var(--g); }
+.brand .f .w { background:var(--w); display:flex; align-items:center; justify-content:center; }
+.brand .f .w::after { content:'★★★'; color:var(--r); font-size:3px; letter-spacing:1px; }
+.brand .f .bk { background:var(--b); }
+
+.live { display:flex; align-items:center; gap:6px; background:rgba(0,230,118,0.1);
+  border:1px solid rgba(0,230,118,0.2); padding:3px 10px; border-radius:50px;
+  font-size:0.7rem; color:#00e676; font-weight:700; }
+.live-dot { width:6px; height:6px; border-radius:50%; background:#00e676; animation:pulse 1.5s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+.countdown { font-size:0.7rem; color:var(--gold); background:rgba(212,175,55,0.1);
+  padding:2px 8px; border-radius:50px; border:1px solid rgba(212,175,55,0.2); }
+
+/* Main */
+.main { padding-top:56px; padding-bottom:80px; }
+.container { max-width:100%; padding:8px; }
+
+/* Rate bar */
+.rate-bar { display:flex; align-items:center; justify-content:space-between;
+  padding:10px 12px; background:var(--card); border:1px solid var(--border);
+  border-radius:16px; margin-bottom:10px; font-size:0.75rem; flex-wrap:wrap; gap:6px; }
+.rate-bar span { color:var(--text2); display:flex; align-items:center; gap:4px; }
+.rate-bar i { color:var(--g); }
+.refresh-btn { padding:5px 12px; border-radius:50px; border:1px solid var(--g);
+  background:rgba(0,122,61,0.1); color:var(--g); font-size:0.7rem; cursor:pointer;
+  display:flex; align-items:center; gap:4px; font-family:'Cairo'; font-weight:600; }
+.refresh-btn.spin i { animation:spin 1s linear infinite; }
+@keyframes spin { to{transform:rotate(360deg)} }
+
+/* BUY/SELL TABS */
+.trade-tabs { display:flex; gap:8px; margin-bottom:12px; }
+.trade-tab { flex:1; padding:12px; border-radius:16px; border:1px solid var(--border);
+  background:var(--card); color:var(--text2); font-family:'Cairo'; font-size:0.9rem;
+  font-weight:700; cursor:pointer; text-align:center; transition:all 0.3s; display:flex;
+  align-items:center; justify-content:center; gap:8px; }
+.trade-tab i { font-size:1.1rem; }
+.trade-tab.buy-tab.active { background:rgba(0,230,118,0.15); border-color:var(--buy); color:var(--buy); box-shadow:0 0 20px rgba(0,230,118,0.1); }
+.trade-tab.sell-tab.active { background:rgba(255,82,82,0.15); border-color:var(--sell); color:var(--sell); box-shadow:0 0 20px rgba(255,82,82,0.1); }
+
+/* Spread info */
+.spread-info { display:flex; gap:8px; margin-bottom:12px; }
+.spread-box { flex:1; background:var(--card); border:1px solid var(--border); border-radius:14px;
+  padding:12px; text-align:center; }
+.spread-box.buy-box { border-color:rgba(0,230,118,0.2); }
+.spread-box.sell-box { border-color:rgba(255,82,82,0.2); }
+.spread-label { font-size:0.7rem; color:var(--text3); margin-bottom:4px; }
+.spread-value { font-size:1.3rem; font-weight:900; }
+.spread-box.buy-box .spread-value { color:var(--buy); }
+.spread-box.sell-box .spread-value { color:var(--sell); }
+.spread-note { font-size:0.65rem; color:var(--text3); margin-top:2px; }
+
+/* Converter Card */
+.conv-card { background:linear-gradient(135deg, rgba(0,122,61,0.1), rgba(206,17,38,0.05));
+  border:1px solid rgba(0,122,61,0.2); border-radius:24px; padding:20px 16px;
+  position:relative; overflow:hidden; margin-bottom:12px; }
+.conv-card::before { content:''; position:absolute; top:0; left:0; width:100%; height:3px;
+  background:linear-gradient(90deg, var(--g), var(--gold), var(--r)); }
+
+/* Input boxes */
+.input-box { background:rgba(255,255,255,0.03); border:1.5px solid var(--border);
+  border-radius:18px; padding:14px 16px; margin-bottom:10px; transition:all 0.3s; }
+.input-box:focus-within { border-color:var(--g); box-shadow:0 0 0 3px rgba(0,122,61,0.1); }
+.input-label { font-size:0.7rem; color:var(--text3); margin-bottom:6px; font-weight:600; }
+.input-row { display:flex; align-items:center; gap:10px; }
+.amount-inp { flex:1; background:none; border:none; outline:none; font-size:1.8rem;
+  font-weight:800; color:var(--text); font-family:'Cairo'; text-align:left; width:100%; }
+.amount-inp::placeholder { color:var(--text3); }
+
+/* Currency selector */
+.curr-sel { display:flex; align-items:center; gap:6px; background:rgba(255,255,255,0.05);
+  border:1px solid var(--border); border-radius:12px; padding:8px 12px; cursor:pointer;
+  flex-shrink:0; min-width:110px; }
+.curr-sel:active { transform:scale(0.97); }
+.curr-flag { font-size:1.3rem; line-height:1; }
+.curr-code { font-weight:800; font-size:0.95rem; color:var(--text); }
+.curr-name { font-size:0.65rem; color:var(--text3); }
+.curr-arrow { color:var(--text3); font-size:0.7rem; margin-right:auto; }
+
+/* Syria flag SVG */
+.syria-flag { width:24px; height:16px; border-radius:2px; overflow:hidden; display:inline-block; vertical-align:middle; }
+
+/* Swap */
+.swap-wrap { text-align:center; margin:4px 0; }
+.swap-btn { width:48px; height:48px; border-radius:50%; background:linear-gradient(135deg, var(--g), var(--gold));
+  border:none; color:#fff; font-size:1.1rem; cursor:pointer; box-shadow:0 4px 15px rgba(0,122,61,0.4);
+  transition:all 0.3s; display:inline-flex; align-items:center; justify-content:center; }
+.swap-btn:active { transform:rotate(180deg) scale(0.9); }
+
+/* Result */
+.result-box { text-align:center; padding:18px; background:rgba(0,122,61,0.06);
+  border-radius:16px; border:1px dashed rgba(0,122,61,0.2); margin-top:8px; }
+.result-num { font-size:2rem; font-weight:900; line-height:1.2; word-break:break-all; }
+.result-num.buy-color { color:var(--buy); }
+.result-num.sell-color { color:var(--sell); }
+.result-info { font-size:0.75rem; color:var(--text2); margin-top:6px; }
+.result-btns { display:flex; gap:8px; justify-content:center; margin-top:12px; flex-wrap:wrap; }
+.res-btn { padding:8px 16px; border-radius:50px; border:1px solid var(--border);
+  background:rgba(255,255,255,0.05); color:var(--text2); font-size:0.75rem;
+  cursor:pointer; display:flex; align-items:center; gap:5px; font-family:'Cairo'; }
+.res-btn:active { background:var(--g); color:#fff; }
+
+/* Trade result cards */
+.trade-result { display:flex; gap:8px; margin-top:10px; }
+.trade-res-card { flex:1; padding:14px; border-radius:16px; text-align:center; }
+.trade-res-card.buy-res { background:rgba(0,230,118,0.08); border:1px solid rgba(0,230,118,0.2); }
+.trade-res-card.sell-res { background:rgba(255,82,82,0.08); border:1px solid rgba(255,82,82,0.2); }
+.trade-res-label { font-size:0.7rem; color:var(--text3); margin-bottom:4px; }
+.trade-res-value { font-size:1.4rem; font-weight:900; }
+.trade-res-card.buy-res .trade-res-value { color:var(--buy); }
+.trade-res-card.sell-res .trade-res-value { color:var(--sell); }
+.trade-res-note { font-size:0.65rem; color:var(--text3); margin-top:4px; }
+
+/* ===== POPULAR SECTION - BIG CARDS WITH ARROWS ===== */
+.section-title { display:flex; align-items:center; justify-content:space-between;
+  padding:0 4px; margin-bottom:10px; }
+.section-title h3 { font-size:0.95rem; font-weight:800; display:flex; align-items:center; gap:6px; }
+.section-title h3 i { color:var(--gold); }
+
+/* Popular cards - horizontal layout with arrows */
+.pop-grid { display:flex; flex-direction:column; gap:10px; margin-bottom:16px; }
+.pop-card { background:var(--card); border:1px solid var(--border); border-radius:20px;
+  padding:16px; cursor:pointer; transition:all 0.3s; position:relative; overflow:hidden;
+  display:flex; align-items:center; gap:14px; }
+.pop-card::before { content:''; position:absolute; top:0; left:0; width:100%; height:3px;
+  background:linear-gradient(90deg, var(--g), var(--gold)); transform:scaleX(0); transition:transform 0.3s; }
+.pop-card:active::before { transform:scaleX(1); }
+.pop-card:active { border-color:rgba(0,122,61,0.3); }
+
+.pop-flag-wrap { font-size:2.2rem; flex-shrink:0; width:50px; text-align:center; }
+.pop-info { flex:1; min-width:0; }
+.pop-name { font-size:1rem; font-weight:800; margin-bottom:2px; }
+.pop-code { font-size:0.75rem; color:var(--text3); margin-bottom:6px; }
+
+/* Buy/Sell prices with arrows */
+.pop-prices { display:flex; gap:12px; }
+.pop-price-item { display:flex; align-items:center; gap:6px; }
+.pop-price-item .arrow { width:28px; height:28px; border-radius:50%; display:flex;
+  align-items:center; justify-content:center; font-size:0.8rem; }
+.pop-price-item.buy .arrow { background:rgba(0,230,118,0.15); color:var(--buy); }
+.pop-price-item.sell .arrow { background:rgba(255,82,82,0.15); color:var(--sell); }
+.pop-price-val { font-weight:800; font-size:0.9rem; }
+.pop-price-item.buy .pop-price-val { color:var(--buy); }
+.pop-price-item.sell .pop-price-val { color:var(--sell); }
+.pop-price-label { font-size:0.6rem; color:var(--text3); }
+
+.pop-change { font-size:0.7rem; margin-top:4px; text-align:right; }
+.pop-change.up { color:#00e676; }
+.pop-change.down { color:#ff5252; }
+
+/* All rates */
+.all-rates { margin-top:16px; }
+.all-item { display:flex; align-items:center; justify-content:space-between;
+  padding:12px; background:var(--card); border:1px solid var(--border);
+  border-radius:14px; margin-bottom:6px; }
+.all-item-left { display:flex; align-items:center; gap:10px; }
+.all-flag { font-size:1.4rem; }
+.all-name { font-weight:700; font-size:0.85rem; }
+.all-rate { color:var(--gold); font-weight:800; font-size:0.9rem; }
+
+/* Toggle all */
+.toggle-all { width:100%; padding:12px; background:var(--card); border:1px solid var(--border);
+  border-radius:14px; color:var(--text2); font-family:'Cairo'; font-size:0.85rem;
+  font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; }
+.toggle-all:active { border-color:var(--g); color:var(--g); }
+
+/* Bottom nav */
+.bottom-nav { position:fixed; bottom:0; left:0; right:0; height:64px;
+  background:rgba(5,10,15,0.95); backdrop-filter:blur(20px);
+  border-top:1px solid var(--border); display:flex; align-items:center;
+  justify-content:space-around; z-index:100; }
+.b-tab { display:flex; flex-direction:column; align-items:center; gap:3px;
+  padding:6px 12px; cursor:pointer; border:none; background:none;
+  color:var(--text3); font-size:0.6rem; font-family:'Cairo'; transition:all 0.2s; }
+.b-tab i { font-size:1.2rem; }
+.b-tab.active { color:var(--g); }
+.b-tab.active i { filter:drop-shadow(0 0 6px rgba(0,122,61,0.5)); }
+
+/* Modal */
+.modal { position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:1000;
+  display:none; align-items:flex-end; justify-content:center; opacity:0; transition:opacity 0.3s; }
+.modal.show { display:flex; opacity:1; }
+.modal-content { width:100%; max-width:500px; background:var(--bg); border-radius:24px 24px 0 0;
+  padding:16px; max-height:80vh; overflow-y:auto; transform:translateY(100%); transition:transform 0.3s; border:1px solid var(--border); }
+.modal.show .modal-content { transform:translateY(0); }
+.modal-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+.modal-title { font-size:1.1rem; font-weight:800; }
+.modal-close { width:36px; height:36px; border-radius:50%; border:none; background:var(--card);
+  color:var(--text2); cursor:pointer; font-size:1rem; }
+.modal-search { width:100%; padding:10px 14px; background:var(--card); border:1px solid var(--border);
+  border-radius:12px; color:var(--text); font-family:'Cairo'; font-size:0.9rem;
+  outline:none; margin-bottom:12px; }
+.modal-search:focus { border-color:var(--g); }
+.curr-item { display:flex; align-items:center; gap:12px; padding:12px;
+  border-radius:12px; cursor:pointer; transition:all 0.2s; }
+.curr-item:active { background:rgba(0,122,61,0.1); }
+.curr-item-flag { font-size:1.5rem; }
+.curr-item-info { flex:1; }
+.curr-item-code { font-weight:800; font-size:0.95rem; }
+.curr-item-name { font-size:0.75rem; color:var(--text3); }
+.curr-item-rate { color:var(--g); font-weight:700; font-size:0.85rem; }
+
+/* Toast */
+.toast { position:fixed; bottom:80px; left:50%; transform:translateX(-50%) translateY(100px);
+  background:var(--card); border:1px solid var(--border); padding:10px 20px; border-radius:50px;
+  font-size:0.85rem; color:var(--text); z-index:2000; opacity:0; transition:all 0.3s;
+  box-shadow:0 8px 32px rgba(0,0,0,0.5); white-space:nowrap; }
+.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+/* Hidden */
+.hidden { display:none !important; }
+
+/* Pages */
+.page { display:none; animation:fadeIn 0.3s; }
+.page.active { display:block; }
+@keyframes fadeIn { from{opacity:0; transform:translateY(10px)} to{opacity:1; transform:translateY(0)} }
+
+/* Responsive */
+@media (max-width:380px) {
+  .amount-inp { font-size:1.5rem; }
+  .result-num { font-size:1.6rem; }
+  .trade-tabs { flex-direction:column; }
+  .spread-info { flex-direction:column; }
+  .pop-prices { flex-direction:column; gap:6px; }
+}
+</style>
+<base target="_blank">
+</head>
+<body>
+<div class="flag-bg"></div>
+<div class="stars">
+  <div class="star"></div>
+  <div class="star" style="animation-delay:0.3s"></div>
+  <div class="star" style="animation-delay:0.6s"></div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Nav -->
+<nav class="nav">
+  <div class="brand">
+    Ahmad El
+  </div>
+  <div style="display:flex;align-items:center;gap:8px;">
+    <div class="live"><div class="live-dot"></div><span>مباشر</span></div>
+    <div class="countdown" id="countdown">05:00</div>
+  </div>
+</nav>
+
+<!-- Main -->
+<main class="main">
+<div class="container">
+
+  <!-- PAGE: Converter -->
+  <div class="page active" id="page-converter">
+    <!-- Rate Bar -->
+    <div class="rate-bar">
+      <span><i class="fas fa-clock"></i> آخر تحديث: <span id="lastUpdate">جاري التحميل...</span></span>
+      <span><i class="fas fa-database"></i> ExchangeRate-API</span>
+    </div>
+
+    <!-- BUY/SELL TABS -->
+    <div class="trade-tabs">
+      <button class="trade-tab buy-tab active" id="tabBuy" onclick="setTradeMode('buy')">
+        <i class="fas fa-arrow-down"></i> شراء
+      </button>
+      <button class="trade-tab sell-tab" id="tabSell" onclick="setTradeMode('sell')">
+        <i class="fas fa-arrow-up"></i> مبيع
+      </button>
+    </div>
+
+    <!-- Buy/Sell Spread -->
+    <div class="spread-info" id="spreadInfo">
+      <div class="spread-box buy-box">
+        <div class="spread-label">سعر الشراء</div>
+        <div class="spread-value" id="buyPrice">—</div>
+        <div class="spread-note">نشتري منك</div>
+      </div>
+      <div class="spread-box sell-box">
+        <div class="spread-label">سعر المبيع</div>
+        <div class="spread-value" id="sellPrice">—</div>
+        <div class="spread-note">نبيع لك</div>
+      </div>
+    </div>
+
+    <!-- Converter -->
+    <div class="conv-card">
+      <!-- From -->
+      <div class="input-box">
+        <div class="input-label" id="inputLabel">المبلغ (دولار)</div>
+        <div class="input-row">
+          <input type="number" class="amount-inp" id="amount" placeholder="0" value="1" oninput="convert()" inputmode="decimal">
+          <div class="curr-sel" onclick="openModal('from')">
+            <span class="curr-flag" id="fromFlag">🇺🇸</span>
+            <div>
+              <div class="curr-code" id="fromCode">USD</div>
+              <div class="curr-name" id="fromName">دولار أمريكي</div>
+            </div>
+            <i class="fas fa-chevron-down curr-arrow"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Swap -->
+      <div class="swap-wrap">
+        <button class="swap-btn" onclick="swap()" id="swapBtn"><i class="fas fa-exchange-alt"></i></button>
+      </div>
+
+      <!-- To -->
+      <div class="input-box">
+        <div class="input-label" id="resultLabel">النتيجة (ليرة سورية)</div>
+        <div class="input-row">
+          <input type="text" class="amount-inp" id="result" placeholder="0" readonly style="color:var(--gold);">
+          <div class="curr-sel" onclick="openModal('to')">
+            <span class="curr-flag" id="toFlag">
+              <svg class="syria-flag" viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg">
+                <rect width="30" height="20" fill="#000"/>
+                <rect width="30" height="13.4" fill="#fff"/>
+                <rect width="30" height="6.7" fill="#007a3d"/>
+                <text x="7.5" y="11.8" font-size="6" fill="#ce1126" text-anchor="middle">★</text>
+                <text x="15" y="11.8" font-size="6" fill="#ce1126" text-anchor="middle">★</text>
+                <text x="22.5" y="11.8" font-size="6" fill="#ce1126" text-anchor="middle">★</text>
+              </svg>
+            </span>
+            <div>
+              <div class="curr-code" id="toCode">SYP</div>
+              <div class="curr-name" id="toName">ليرة سورية</div>
+            </div>
+            <i class="fas fa-chevron-down curr-arrow"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Result (hidden - kept only so copy/share logic still works) -->
+      <div class="result-box hidden">
+        <div class="result-num buy-color" id="bigResult">—</div>
+        <div class="result-info" id="resultInfo">اختر نوع التحويل</div>
+        <div class="trade-result" id="tradeResult">
+          <div class="trade-res-card buy-res">
+            <div class="trade-res-label"><i class="fas fa-arrow-down"></i> سعر الشراء</div>
+            <div class="trade-res-value" id="buyResult">—</div>
+            <div class="trade-res-note">نشتري منك بـ</div>
+          </div>
+          <div class="trade-res-card sell-res">
+            <div class="trade-res-label"><i class="fas fa-arrow-up"></i> سعر المبيع</div>
+            <div class="trade-res-value" id="sellResult">—</div>
+            <div class="trade-res-note">نبيع لك بـ</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="result-btns" style="margin-top:12px;">
+        <button class="res-btn" onclick="copyResult()"><i class="fas fa-copy"></i> نسخ</button>
+        <button class="res-btn" onclick="shareResult()"><i class="fas fa-share-alt"></i> مشاركة</button>
+      </div>
+    </div>
+
+    <!-- ===== POPULAR: Syria, USD, Turkey with Buy/Sell Arrows ===== -->
+    <div class="section-title">
+      <h3><i class="fas fa-fire"></i> الشائع - أسعار الصرف</h3>
+    </div>
+    <div class="pop-grid" id="popGrid"></div>
+
+    <!-- All rates -->
+    <div class="all-rates">
+      <button class="toggle-all" onclick="toggleAllRates()" id="toggleAllBtn">
+        <i class="fas fa-chevron-down"></i> عرض جميع العملات مع الأسعار
+      </button>
+      <div id="allRatesList" style="margin-top:10px;"></div>
+    </div>
+  </div>
+
+  <!-- PAGE: Settings -->
+  <div class="page" id="page-settings">
+    <div style="padding:10px;">
+      <div style="background:var(--card); border:1px solid var(--border); border-radius:18px; padding:20px; margin-bottom:12px;">
+        <h3 style="margin-bottom:16px; font-size:1.1rem;">⚙️ الإعدادات</h3>
+        <div style="font-size:0.85rem; color:var(--text2); line-height:2;">
+          <div>• حالة اتصال الليرة السورية: <span id="sypStatus">—</span></div>
+          <div>• آخر مزامنة لليرة السورية: <span id="sypSyncTime">—</span></div>
+          <div>• آخر تحديث: <span id="infoLastUpdate">—</span></div>
+        </div>
+      </div>
+      <div style="text-align:center; padding:14px; color:var(--text3); font-size:0.8rem;">
+        تصميم المهندس <span style="color:var(--gold); font-weight:800;">Ahmad El</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+</main>
+
+<!-- Bottom Nav -->
+<nav class="bottom-nav">
+  <button class="b-tab active" onclick="switchPage('converter')">
+    <i class="fas fa-exchange-alt"></i>
+    <span>تحويل</span>
+  </button>
+  <button class="b-tab" onclick="switchPage('settings')">
+    <i class="fas fa-cog"></i>
+    <span>إعدادات</span>
+  </button>
+</nav>
+
+<!-- Currency Modal -->
+<div class="modal" id="currModal" onclick="closeModal(event)">
+  <div class="modal-content" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <div class="modal-title">اختر العملة</div>
+      <button class="modal-close" onclick="closeModalForce()"><i class="fas fa-times"></i></button>
+    </div>
+    <input type="text" class="modal-search" id="modalSearch" placeholder="ابحث عن عملة..." oninput="filterCurrencies()">
+    <div id="modalList"></div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+// AHMAD EL - BUY & SELL WITH ARROWS
+// ═══════════════════════════════════════════════
+
+const BASE_RATES = {
+  USD: 1, SYP: 12950, TRY: 46.79, EUR: 0.923, SAR: 3.75, AED: 3.672,
+  EGP: 50.85, JOD: 0.709, LBP: 89500, IQD: 1310, KWD: 0.307, QAR: 3.64,
+  BHD: 0.376, OMR: 0.385, GBP: 0.785, JPY: 161.45, CNY: 7.245, INR: 85.5,
+  RUB: 88.75, CAD: 1.365, AUD: 1.525, CHF: 0.892, SEK: 10.65, NOK: 10.85,
+  DKK: 6.895, PKR: 278.5, BDT: 109.5, MAD: 9.95, TND: 3.12, DZD: 134.5,
+  LYD: 4.85, SDG: 600, YER: 530, AFN: 71.5, IRR: 42000,
+};
+
+// سعر الليرة السورية (سوق موازي) - لا توجد له API رسمية مجانية
+// تجربة: قراءة مباشرة (غير رسمية) من sp-today.com عبر خدمة وسيطة - قد تتوقف بدون إنذار
+// SYP_MANUAL هو دائماً "آخر رقم حقيقي معروف" - يُحدَّث تلقائياً عند نجاح القراءة،
+// ويبقى محفوظاً محلياً كنسخة احتياطية إذا تعطلت القراءة المباشرة مستقبلاً
+let SYP_MANUAL = { buy: 12900, sell: 13000 };
+try {
+  const cachedSyp = localStorage.getItem('sypManualCache');
+  if (cachedSyp) {
+    const parsed = JSON.parse(cachedSyp);
+    if (parsed && parsed.buy > 0 && parsed.sell > 0) SYP_MANUAL = parsed;
+  }
+} catch (e) {}
+let sypLiveOK = false;
+let sypLastSync = localStorage.getItem('sypLastSync') || null;
+
+const SPREAD = 0.02;
+
+const CURRENCIES = {
+  USD: { name: 'دولار أمريكي', flag: '🇺🇸', symbol: '$' },
+  SYP: { name: 'ليرة سورية', flag: 'syria', symbol: 'ل.س' },
+  TRY: { name: 'ليرة تركية', flag: '🇹🇷', symbol: '₺' },
+  EUR: { name: 'يورو', flag: '🇪🇺', symbol: '€' },
+  SAR: { name: 'ريال سعودي', flag: '🇸🇦', symbol: '﷼' },
+  AED: { name: 'درهم إماراتي', flag: '🇦🇪', symbol: 'د.إ' },
+  EGP: { name: 'جنيه مصري', flag: '🇪🇬', symbol: 'ج.م' },
+  JOD: { name: 'دينار أردني', flag: '🇯🇴', symbol: 'د.أ' },
+  LBP: { name: 'ليرة لبنانية', flag: '🇱🇧', symbol: 'ل.ل' },
+  IQD: { name: 'دينار عراقي', flag: '🇮🇶', symbol: 'د.ع' },
+  KWD: { name: 'دينار كويتي', flag: '🇰🇼', symbol: 'د.ك' },
+  QAR: { name: 'ريال قطري', flag: '🇶🇦', symbol: 'ر.ق' },
+  BHD: { name: 'دينار بحريني', flag: '🇧🇭', symbol: 'د.ب' },
+  OMR: { name: 'ريال عماني', flag: '🇴🇲', symbol: 'ر.ع' },
+  GBP: { name: 'جنيه إسترليني', flag: '🇬🇧', symbol: '£' },
+  JPY: { name: 'ين ياباني', flag: '🇯🇵', symbol: '¥' },
+  CNY: { name: 'يوان صيني', flag: '🇨🇳', symbol: '¥' },
+  INR: { name: 'روبية هندية', flag: '🇮🇳', symbol: '₹' },
+  RUB: { name: 'روبل روسي', flag: '🇷🇺', symbol: '₽' },
+  CAD: { name: 'دولار كندي', flag: '🇨🇦', symbol: '$' },
+  AUD: { name: 'دولار أسترالي', flag: '🇦🇺', symbol: '$' },
+  CHF: { name: 'فرنك سويسري', flag: '🇨🇭', symbol: 'Fr' },
+  SEK: { name: 'كرونة سويدية', flag: '🇸🇪', symbol: 'kr' },
+  NOK: { name: 'كرونة نرويجية', flag: '🇳🇴', symbol: 'kr' },
+  DKK: { name: 'كرونة دنماركية', flag: '🇩🇰', symbol: 'kr' },
+  PKR: { name: 'روبية باكستانية', flag: '🇵🇰', symbol: '₨' },
+  BDT: { name: 'تاكا بنجلاديشية', flag: '🇧🇩', symbol: '৳' },
+  MAD: { name: 'درهم مغربي', flag: '🇲🇦', symbol: 'د.م' },
+  TND: { name: 'دينار تونسي', flag: '🇹🇳', symbol: 'د.ت' },
+  DZD: { name: 'دينار جزائري', flag: '🇩🇿', symbol: 'د.ج' },
+  LYD: { name: 'دينار ليبي', flag: '🇱🇾', symbol: 'د.ل' },
+  SDG: { name: 'جنيه سوداني', flag: '🇸🇩', symbol: 'ج.س' },
+  YER: { name: 'ريال يمني', flag: '🇾🇪', symbol: 'ر.ي' },
+  AFN: { name: 'أفغاني', flag: '🇦🇫', symbol: '؋' },
+  IRR: { name: 'ريال إيراني', flag: '🇮🇷', symbol: '﷼' },
+};
+
+const SYRIA_FLAG = `<svg class="syria-flag" viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg">
+  <rect width="30" height="20" fill="#000"/>
+  <rect width="30" height="13.4" fill="#fff"/>
+  <rect width="30" height="6.7" fill="#007a3d"/>
+  <text x="7.5" y="11.8" font-size="6" fill="#ce1126" text-anchor="middle">★</text>
+  <text x="15" y="11.8" font-size="6" fill="#ce1126" text-anchor="middle">★</text>
+  <text x="22.5" y="11.8" font-size="6" fill="#ce1126" text-anchor="middle">★</text>
+</svg>`;
+
+let fromCurr = 'USD';
+let toCurr = 'SYP';
+let tradeMode = 'buy';
+let modalTarget = null;
+let countdown = 300;
+let countdownInterval = null;
+let autoUpdateInterval = null;
+let allRatesOpen = false;
+
+function getBuySellRates(from, to) {
+  if (from === to) return { buy: 1, sell: 1, mid: 1 };
+
+  // حالة خاصة: الليرة السورية تُحسب من الأرقام اليدوية مباشرة (لا يوجد API رسمي لها)
+  if (from === 'USD' && to === 'SYP') {
+    return { buy: SYP_MANUAL.buy, sell: SYP_MANUAL.sell, mid: (SYP_MANUAL.buy + SYP_MANUAL.sell) / 2 };
+  }
+  if (from === 'SYP' && to === 'USD') {
+    return { buy: 1 / SYP_MANUAL.sell, sell: 1 / SYP_MANUAL.buy, mid: 2 / (SYP_MANUAL.buy + SYP_MANUAL.sell) };
+  }
+
+  const fromRate = BASE_RATES[from], toRate = BASE_RATES[to];
+  if (!fromRate || !toRate) return null;
+  const mid = toRate / fromRate;
+  return { buy: mid * (1 - SPREAD), sell: mid * (1 + SPREAD), mid: mid };
+}
+
+function getRate(from, to, mode) {
+  const rates = getBuySellRates(from, to);
+  if (!rates) return null;
+  return mode === 'buy' ? rates.buy : rates.sell;
+}
+
+// جلب الأسعار الحية الرسمية لكل العملات (ما عدا الليرة السورية - انظر SYP_MANUAL)
+let liveRatesOK = false;
+async function fetchLiveRates() {
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 7000);
+    let res;
+    try {
+      res = await fetch('https://open.er-api.com/v6/latest/USD', { signal: controller.signal });
+    } finally {
+      clearTimeout(timeoutId);
+    }
+    const data = await res.json();
+    if (data && data.result === 'success' && data.rates) {
+      Object.keys(BASE_RATES).forEach(code => {
+        if (code === 'USD' || code === 'SYP') return;
+        if (typeof data.rates[code] === 'number') BASE_RATES[code] = data.rates[code];
+      });
+      liveRatesOK = true;
+      return true;
+    }
+  } catch (e) {
+    console.warn('تعذر الاتصال بمصدر الأسعار الحي، سيتم استخدام آخر قيم محفوظة', e);
+  }
+  liveRatesOK = false;
+  return false;
+}
+
+// قراءة مباشرة (غير رسمية) لسعر الليرة السورية من sp-today.com عبر عدة مصادر وسيطة بالتوازي
+// ⚠️ هذه طريقة تجريبية غير مضمونة: قد تتوقف إذا غيّر الموقع تصميمه أو توقفت كل المصادر الوسيطة
+const SYP_SOURCES = [
+  { build: t => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(t), json: false },
+  { build: t => 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(t), json: false },
+  { build: t => 'https://corsproxy.io/?url=' + encodeURIComponent(t), json: false },
+  { build: t => 'https://thingproxy.freeboard.io/fetch/' + t, json: false },
+  { build: t => 'https://r.jina.ai/' + t, json: false },
+  { build: t => 'https://api.allorigins.win/get?url=' + encodeURIComponent(t), json: true },
+];
+
+async function fetchWithTimeout(url, ms) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), ms);
+  try {
+    return await fetch(url, { signal: controller.signal });
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+async function trySypSource(source, targetUrl) {
+  const res = await fetchWithTimeout(source.build(targetUrl), 6000);
+  if (!res.ok) throw new Error('http_' + res.status);
+  let raw;
+  if (source.json) {
+    const data = await res.json();
+    raw = (data && data.contents) || '';
+  } else {
+    raw = await res.text();
+  }
+  const text = raw.replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ');
+  const match = text.match(/Buy\s*([\d,]+)\s*SYP\s*Sell\s*([\d,]+)\s*SYP/i);
+  if (!match) throw new Error('parse_failed');
+  const buy = parseInt(match[1].replace(/,/g, ''), 10);
+  const sell = parseInt(match[2].replace(/,/g, ''), 10);
+  if (!(buy > 1000 && sell > 1000 && sell >= buy)) throw new Error('invalid_values');
+  return { buy, sell };
+}
+
+async function fetchSypLive() {
+  const targetUrl = 'https://sp-today.com/en/currency/us-dollar';
+  // نطلق كل المصادر بنفس اللحظة (بالتوازي) — أول وحدة توصّل نتيجة صحيحة تفوز فوراً
+  try {
+    const result = await Promise.any(SYP_SOURCES.map(s => trySypSource(s, targetUrl)));
+    SYP_MANUAL = result;
+    BASE_RATES.SYP = (result.buy + result.sell) / 2;
+    sypLastSync = new Date().toISOString();
+    localStorage.setItem('sypManualCache', JSON.stringify(SYP_MANUAL));
+    localStorage.setItem('sypLastSync', sypLastSync);
+    sypLiveOK = true;
+    return true;
+  } catch (e) {
+    console.warn('كل المصادر فشلت بهذه المحاولة، سيُعاد المحاولة تلقائياً خلال ثوانٍ', e);
+    sypLiveOK = false;
+    return false;
+  }
+}
+
+// مراقبة منفصلة لحالة اتصال الليرة السورية: تعيد المحاولة كل ثانيتين طالما غير متصلة،
+// وترجع للإيقاع العادي (كل دقيقة) بمجرد نجاح الاتصال
+let sypFetchInFlight = false;
+let sypLastAttemptTs = 0;
+let sypWatcherInterval = null;
+
+function startSypWatcher() {
+  if (sypWatcherInterval) clearInterval(sypWatcherInterval);
+  sypWatcherInterval = setInterval(async () => {
+    if (sypFetchInFlight) return;
+    const cooldown = sypLiveOK ? 60000 : 2000;
+    if (Date.now() - sypLastAttemptTs < cooldown) return;
+    sypFetchInFlight = true;
+    sypLastAttemptTs = Date.now();
+    const wasOK = sypLiveOK;
+    await fetchSypLive();
+    sypFetchInFlight = false;
+    updateSypStatus();
+    if (!wasOK && sypLiveOK) {
+      // نجح الاتصال بعد ما كان منقطع: حدّث كل الأرقام المعروضة فوراً
+      convert();
+      renderPopular();
+      if (allRatesOpen) renderAllRates();
+    }
+  }, 1000);
+}
+
+async function init() {
+  renderPopular();
+  updateUI();
+  setTradeMode(tradeMode, false);
+  convert();
+  startCountdown();
+  startAutoUpdate();
+  startSypWatcher();
+  updateLastUpdate();
+
+  // جلب الأسعار الحية عند فتح الصفحة (لا تُحجب الواجهة بانتظاره)
+  await Promise.all([fetchLiveRates(), fetchSypLive()]);
+  sypLastAttemptTs = Date.now();
+  lastUpdateTs = Date.now();
+  renderPopular();
+  convert();
+  updateSpreadInfo();
+  if (allRatesOpen) renderAllRates();
+  updateLastUpdate();
+}
+
+function setTradeMode(mode, save) {
+  tradeMode = mode;
+  document.getElementById('tabBuy').classList.toggle('active', mode === 'buy');
+  document.getElementById('tabSell').classList.toggle('active', mode === 'sell');
+
+  const fromC = CURRENCIES[fromCurr], toC = CURRENCIES[toCurr];
+  if (mode === 'buy') {
+    document.getElementById('inputLabel').textContent = 'المبلغ (' + fromC.name + ') - أنا أبيع';
+    document.getElementById('resultLabel').textContent = 'النتيجة (' + toC.name + ') - نشتري منك';
+  } else {
+    document.getElementById('inputLabel').textContent = 'المبلغ (' + fromC.name + ') - أنا أشتري';
+    document.getElementById('resultLabel').textContent = 'النتيجة (' + toC.name + ') - نبيع لك';
+  }
+  convert();
+  updateSpreadInfo();
+}
+
+function updateSpreadInfo() {
+  const rates = getBuySellRates(fromCurr, toCurr);
+  if (!rates) return;
+  const toSym = CURRENCIES[toCurr].symbol;
+  document.getElementById('buyPrice').textContent = formatNum(rates.buy) + ' ' + toSym;
+  document.getElementById('sellPrice').textContent = formatNum(rates.sell) + ' ' + toSym;
+}
+
+function convert() {
+  const amount = parseFloat(document.getElementById('amount').value) || 0;
+  const rates = getBuySellRates(fromCurr, toCurr);
+
+  if (!rates || amount <= 0) {
+    document.getElementById('result').value = '';
+    document.getElementById('bigResult').textContent = '—';
+    document.getElementById('resultInfo').textContent = 'أدخل مبلغاً';
+    document.getElementById('buyResult').textContent = '—';
+    document.getElementById('sellResult').textContent = '—';
+    return;
+  }
+
+  const currentResult = amount * getRate(fromCurr, toCurr, tradeMode);
+  const toSym = CURRENCIES[toCurr].symbol;
+  const fromSym = CURRENCIES[fromCurr].symbol;
+
+  let formatted = currentResult >= 1000000 
+    ? currentResult.toLocaleString('en-US', { maximumFractionDigits: 0 })
+    : currentResult >= 1 
+      ? currentResult.toLocaleString('en-US', { maximumFractionDigits: 2 })
+      : currentResult.toLocaleString('en-US', { maximumFractionDigits: 4 });
+
+  document.getElementById('result').value = formatted;
+
+  const bigResult = document.getElementById('bigResult');
+  bigResult.className = 'result-num ' + (tradeMode === 'buy' ? 'buy-color' : 'sell-color');
+  bigResult.textContent = formatted + ' ' + toSym;
+
+  const modeText = tradeMode === 'buy' ? 'سعر الشراء' : 'سعر المبيع';
+  document.getElementById('resultInfo').textContent = amount + ' ' + fromSym + ' = ' + formatted + ' ' + toSym + ' (' + modeText + ')';
+
+  document.getElementById('buyResult').textContent = formatNum(amount * rates.buy) + ' ' + toSym;
+  document.getElementById('sellResult').textContent = formatNum(amount * rates.sell) + ' ' + toSym;
+
+  updateSpreadInfo();
+}
+
+function formatNum(n) {
+  if (isNaN(n) || n === null) return '0';
+  if (n >= 1000000) return n.toLocaleString('en-US', { maximumFractionDigits: 0 });
+  if (n >= 1) return n.toLocaleString('en-US', { maximumFractionDigits: 2 });
+  return n.toLocaleString('en-US', { maximumFractionDigits: 4 });
+}
+
+function updateUI() {
+  const fromC = CURRENCIES[fromCurr];
+  document.getElementById('fromCode').textContent = fromCurr;
+  document.getElementById('fromName').textContent = fromC.name;
+  document.getElementById('fromFlag').innerHTML = fromC.flag === 'syria' ? SYRIA_FLAG : fromC.flag;
+
+  const toC = CURRENCIES[toCurr];
+  document.getElementById('toCode').textContent = toCurr;
+  document.getElementById('toName').textContent = toC.name;
+  document.getElementById('toFlag').innerHTML = toC.flag === 'syria' ? SYRIA_FLAG : toC.flag;
+}
+
+function swap() {
+  const tmp = fromCurr; fromCurr = toCurr; toCurr = tmp;
+  updateUI();
+  setTradeMode(tradeMode, false);
+  convert();
+  const btn = document.getElementById('swapBtn');
+  btn.style.transform = 'rotate(180deg)';
+  setTimeout(() => btn.style.transform = '', 300);
+}
+
+// ===== POPULAR CARDS WITH BUY/SELL ARROWS =====
+function renderPopular() {
+  const popular = [
+    { code: 'SYP', name: 'ليرة سورية' },
+    { code: 'USD', name: 'دولار أمريكي' },
+    { code: 'TRY', name: 'ليرة تركية' },
+  ];
+
+  const grid = document.getElementById('popGrid');
+  grid.innerHTML = '';
+
+  popular.forEach(p => {
+    const rates = getBuySellRates('USD', p.code);
+    const flag = p.code === 'SYP' ? SYRIA_FLAG : CURRENCIES[p.code].flag;
+    const change = (Math.random() * 2 - 0.5).toFixed(2);
+    const isUp = change >= 0;
+
+    const card = document.createElement('div');
+    card.className = 'pop-card';
+    card.innerHTML = `
+      <div class="pop-flag-wrap">${flag}</div>
+      <div class="pop-info">
+        <div class="pop-name">${p.name}</div>
+        <div class="pop-code">${p.code}</div>
+        <div class="pop-prices">
+          <div class="pop-price-item buy">
+            <div class="arrow"><i class="fas fa-arrow-down"></i></div>
+            <div>
+              <div class="pop-price-val">${rates ? formatNum(rates.buy) : '—'}</div>
+              <div class="pop-price-label">شراء</div>
+            </div>
+          </div>
+          <div class="pop-price-item sell">
+            <div class="arrow"><i class="fas fa-arrow-up"></i></div>
+            <div>
+              <div class="pop-price-val">${rates ? formatNum(rates.sell) : '—'}</div>
+              <div class="pop-price-label">مبيع</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="pop-change ${isUp ? 'up' : 'down'}">
+        <i class="fas fa-arrow-${isUp ? 'up' : 'down'}"></i> ${Math.abs(change)}%
+      </div>
+    `;
+
+    card.onclick = () => {
+      toCurr = p.code;
+      updateUI();
+      convert();
+      showToast('✅ ' + p.name);
+    };
+
+    grid.appendChild(card);
+  });
+}
+
+// All rates
+function toggleAllRates() {
+  allRatesOpen = !allRatesOpen;
+  const btn = document.getElementById('toggleAllBtn');
+  const list = document.getElementById('allRatesList');
+
+  if (allRatesOpen) {
+    btn.innerHTML = '<i class="fas fa-chevron-up"></i> إخفاء العملات';
+    renderAllRates();
+  } else {
+    btn.innerHTML = '<i class="fas fa-chevron-down"></i> عرض جميع العملات مع الأسعار';
+    list.innerHTML = '';
+  }
+}
+
+function renderAllRates() {
+  const list = document.getElementById('allRatesList');
+  list.innerHTML = '';
+
+  Object.keys(CURRENCIES).forEach(code => {
+    if (code === 'USD') return;
+    const rates = getBuySellRates('USD', code);
+    const c = CURRENCIES[code];
+    const flag = c.flag === 'syria' ? SYRIA_FLAG : c.flag;
+
+    const item = document.createElement('div');
+    item.className = 'all-item';
+    item.style.cursor = 'pointer';
+    item.onclick = () => {
+      toCurr = code;
+      updateUI();
+      convert();
+      showToast('✅ ' + c.name);
+    };
+
+    item.innerHTML = `
+      <div class="all-item-left">
+        <span class="all-flag">${flag}</span>
+        <div>
+          <div class="all-name">${c.name}</div>
+          <div style="font-size:0.7rem; margin-top:2px;">
+            <span style="color:var(--buy);"><i class="fas fa-arrow-down"></i> ${rates ? formatNum(rates.buy) : '—'}</span>
+            <span style="color:var(--text3); margin:0 6px;">|</span>
+            <span style="color:var(--sell);"><i class="fas fa-arrow-up"></i> ${rates ? formatNum(rates.sell) : '—'}</span>
+          </div>
+        </div>
+      </div>
+      <span class="all-rate">${rates ? formatNum(rates.mid) : '—'}</span>
+    `;
+    list.appendChild(item);
+  });
+}
+
+// Modal
+function openModal(target) {
+  modalTarget = target;
+  document.getElementById('modalSearch').value = '';
+  renderModalList('');
+  document.getElementById('currModal').classList.add('show');
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById('currModal')) {
+    document.getElementById('currModal').classList.remove('show');
+  }
+}
+
+function closeModalForce() {
+  document.getElementById('currModal').classList.remove('show');
+}
+
+function filterCurrencies() {
+  renderModalList(document.getElementById('modalSearch').value);
+}
+
+function renderModalList(q) {
+  const list = document.getElementById('modalList');
+  list.innerHTML = '';
+  const query = q.toLowerCase().trim();
+
+  Object.keys(CURRENCIES).forEach(code => {
+    const c = CURRENCIES[code];
+    if (query && !code.toLowerCase().includes(query) && !c.name.includes(query)) return;
+
+    const item = document.createElement('div');
+    item.className = 'curr-item';
+    item.onclick = () => selectCurrency(code);
+    const flag = c.flag === 'syria' ? SYRIA_FLAG : c.flag;
+    const rates = getBuySellRates('USD', code);
+
+    item.innerHTML = `
+      <span class="curr-item-flag">${flag}</span>
+      <div class="curr-item-info">
+        <div class="curr-item-code">${code}</div>
+        <div class="curr-item-name">${c.name}</div>
+      </div>
+      <div style="text-align:left;">
+        <div style="color:var(--buy); font-size:0.75rem;"><i class="fas fa-arrow-down"></i> ${rates ? formatNum(rates.buy) : '—'}</div>
+        <div style="color:var(--sell); font-size:0.75rem;"><i class="fas fa-arrow-up"></i> ${rates ? formatNum(rates.sell) : '—'}</div>
+      </div>
+    `;
+    list.appendChild(item);
+  });
+}
+
+function selectCurrency(code) {
+  if (modalTarget === 'from') {
+    fromCurr = code;
+  } else {
+    toCurr = code;
+  }
+  updateUI();
+  setTradeMode(tradeMode, false);
+  convert();
+  closeModalForce();
+}
+
+// Countdown & Auto update
+function startCountdown() {
+  countdown = 60;
+  updateCountdown();
+  if (countdownInterval) clearInterval(countdownInterval);
+  countdownInterval = setInterval(() => {
+    countdown--;
+    if (countdown <= 0) countdown = 60;
+    updateCountdown();
+  }, 1000);
+}
+
+function updateCountdown() {
+  const m = Math.floor(countdown / 60).toString().padStart(2, '0');
+  const s = (countdown % 60).toString().padStart(2, '0');
+  const el = document.getElementById('countdown');
+  if (el) el.textContent = m + ':' + s;
+}
+
+let lastUpdateTs = Date.now();
+
+function startAutoUpdate() {
+  if (autoUpdateInterval) clearInterval(autoUpdateInterval);
+  // فحص كل ثانية بدلاً من الاعتماد فقط على مهلة 60 ثانية،
+  // حتى تلحق الصفحة فوراً بأي تأخير يسببه تجميد المتصفح للتبويب في الخلفية
+  autoUpdateInterval = setInterval(() => {
+    if (Date.now() - lastUpdateTs >= 60000) refreshRates();
+  }, 1000);
+}
+
+// عندما يرجع المستخدم للتبويب (بعد تصغيره أو تبديل تطبيقات)
+// نتحقق فوراً إن مر وقت كافٍ ونحدث الأسعار دون انتظار، حتى لو أبطأ المتصفح المؤقتات وهو بالخلفية
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && Date.now() - lastUpdateTs >= 60000) {
+    refreshRates();
+  }
+});
+
+async function refreshRates() {
+  lastUpdateTs = Date.now();
+  // الليرة السورية لها مراقبة سريعة منفصلة (startSypWatcher)، فلا نكررها هنا إلا لو ما في محاولة شغالة أصلاً
+  const tasks = [fetchLiveRates()];
+  if (!sypFetchInFlight) {
+    sypFetchInFlight = true;
+    sypLastAttemptTs = Date.now();
+    tasks.push(fetchSypLive().finally(() => { sypFetchInFlight = false; }));
+  }
+  await Promise.all(tasks);
+  convert();
+  renderPopular();
+  if (allRatesOpen) renderAllRates();
+  updateLastUpdate();
+  startCountdown();
+}
+
+function updateLastUpdate() {
+  const time = new Date().toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' });
+  document.getElementById('lastUpdate').textContent = time;
+  document.getElementById('infoLastUpdate').textContent = time;
+  updateSypStatus();
+}
+
+function updateSypStatus() {
+  const statusEl = document.getElementById('sypStatus');
+  const syncEl = document.getElementById('sypSyncTime');
+  if (!statusEl || !syncEl) return;
+  statusEl.textContent = sypLiveOK ? '🟢 متصلة (آخر قراءة نجحت)' : '🟠 غير متصلة الآن (تُستخدم آخر قيمة محفوظة)';
+  statusEl.style.color = sypLiveOK ? 'var(--buy)' : 'var(--gold)';
+  syncEl.textContent = sypLastSync ? new Date(sypLastSync).toLocaleString('ar-SA') : 'لم تتم بعد';
+}
+
+// Copy & Share
+function copyResult() {
+  const text = document.getElementById('resultInfo').textContent;
+  if (text.includes('أدخل')) { showToast('❌ لا يوجد نتيجة'); return; }
+  const rates = getBuySellRates(fromCurr, toCurr);
+  const amount = parseFloat(document.getElementById('amount').value) || 0;
+  const fullText = text +
+    '\n💚 شراء: ' + formatNum(amount * rates.buy) + ' ' + CURRENCIES[toCurr].symbol +
+    '\n❤️ مبيع: ' + formatNum(amount * rates.sell) + ' ' + CURRENCIES[toCurr].symbol +
+    '\n\nAhmad El - محول العملات';
+  navigator.clipboard.writeText(fullText).then(() => showToast('📋 تم النسخ'));
+}
+
+function shareResult() {
+  const text = document.getElementById('resultInfo').textContent;
+  if (text.includes('أدخل')) { showToast('❌ لا يوجد نتيجة'); return; }
+  const rates = getBuySellRates(fromCurr, toCurr);
+  const amount = parseFloat(document.getElementById('amount').value) || 0;
+  const fullText = text +
+    '\n💚 سعر الشراء: ' + formatNum(amount * rates.buy) + ' ' + CURRENCIES[toCurr].symbol +
+    '\n❤️ سعر المبيع: ' + formatNum(amount * rates.sell) + ' ' + CURRENCIES[toCurr].symbol +
+    '\n\nAhmad El - محول العملات';
+  if (navigator.share) {
+    navigator.share({ title: 'Ahmad El', text: fullText });
+  } else {
+    navigator.clipboard.writeText(fullText).then(() => showToast('📋 تم النسخ'));
+  }
+}
+
+// Utils
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2500);
+}
+
+function switchPage(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  document.querySelectorAll('.b-tab').forEach(t => t.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+}
+
+window.onload = init;
+</script>
+</body>
+</html>
